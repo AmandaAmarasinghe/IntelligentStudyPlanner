@@ -1,2 +1,1 @@
-# EEX6340_MiniProject_221444962
-Intelligent Study Planner
+Intelligent Study Planner for students
