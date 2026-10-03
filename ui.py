@@ -973,6 +973,8 @@ class IntelligentStudyPlannerUI:
             False
         ):
 
+            # The Complete button remains available.
+            # Validation happens when it is clicked.
             tk.Button(
                 right_frame,
                 text="✓ Complete",
@@ -1261,7 +1263,6 @@ class IntelligentStudyPlannerUI:
                 )
                 return
 
-            # IMPORTANT:
             # Prevent past times when scheduling for today
             is_valid, error = (
                 self.logic.validate_session_not_in_past(
@@ -1342,6 +1343,20 @@ class IntelligentStudyPlannerUI:
         )
 
     def complete_session(self, idx):
+
+        # Check whether the session is allowed to be completed.
+        is_valid, error = (
+            self.logic.validate_session_completion(idx)
+        )
+
+        if not is_valid:
+
+            messagebox.showwarning(
+                "Session Not Available",
+                error
+            )
+
+            return
 
         hours, subject_name = (
             self.logic.complete_session(idx)

@@ -5,7 +5,11 @@ from ui import IntelligentStudyPlannerUI
 def main():
     root = tk.Tk()
     app = IntelligentStudyPlannerUI(root)
-    root.mainloop()
+
+    try:
+        root.mainloop()
+    except KeyboardInterrupt:
+        root.destroy()
 
 
 if __name__ == "__main__":

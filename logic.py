@@ -123,10 +123,100 @@ class StudyPlannerLogic:
 
         return False
 
+    def validate_session_completion(self, idx):
+        """
+        Check whether a session is allowed to be marked as completed.
+
+        A session can only be completed after its scheduled
+        end date and time have passed.
+        """
+
+        if not 0 <= idx < len(self.study_sessions):
+            return False, "Invalid study session."
+
+        session = self.study_sessions[idx]
+
+        if session.get("completed", False):
+            return False, "This session has already been completed."
+
+        try:
+            session_date = datetime.strptime(
+                session["date"],
+                "%Y-%m-%d"
+            ).date()
+
+            session_start_time = datetime.strptime(
+                session["start_time"],
+                "%H:%M"
+            ).time()
+
+            session_end_time = datetime.strptime(
+                session["end_time"],
+                "%H:%M"
+            ).time()
+
+            session_start = datetime.combine(
+                session_date,
+                session_start_time
+            )
+
+            session_end = datetime.combine(
+                session_date,
+                session_end_time
+            )
+
+        except ValueError:
+            return False, "The session date or time is invalid."
+
+        now = datetime.now()
+
+        # Session has not started yet
+        if now < session_start:
+
+            formatted_date = session_start.strftime(
+                "%B %d, %Y"
+            )
+
+            return (
+                False,
+                f"This session has not started yet.\n\n"
+                f"Scheduled date: {formatted_date}\n"
+                f"Scheduled time: "
+                f"{session['start_time']} - "
+                f"{session['end_time']}\n\n"
+                f"Please wait until the session has finished "
+                f"before marking it as completed."
+            )
+
+        # Session is currently in progress
+        if session_start <= now < session_end:
+
+            return (
+                False,
+                f"This session is still in progress.\n\n"
+                f"Scheduled time: "
+                f"{session['start_time']} - "
+                f"{session['end_time']}\n\n"
+                f"Please complete the session first, "
+                f"then click Complete after the scheduled "
+                f"end time."
+            )
+
+        # Session has finished
+        return True, None
+
     def complete_session(self, idx):
         # Mark a session as completed and update subject hours
+
         if 0 <= idx < len(self.study_sessions):
+
             session = self.study_sessions[idx]
+
+            # Check whether the session can be completed
+            is_valid, error = self.validate_session_completion(idx)
+
+            if not is_valid:
+                return 0, None
 
             # Prevent completing the same session twice
             if session.get("completed", False):
@@ -135,8 +225,15 @@ class StudyPlannerLogic:
             session["completed"] = True
 
             # Update subject hours
-            start = datetime.strptime(session["start_time"], "%H:%M")
-            end = datetime.strptime(session["end_time"], "%H:%M")
+            start = datetime.strptime(
+                session["start_time"],
+                "%H:%M"
+            )
+
+            end = datetime.strptime(
+                session["end_time"],
+                "%H:%M"
+            )
 
             hours = (end - start).seconds / 3600
 
