@@ -1,0 +1,6 @@
+﻿.venv/
+venv/
+.idea/
+__pycache__/
+*.pyc
+study_planner_data.json

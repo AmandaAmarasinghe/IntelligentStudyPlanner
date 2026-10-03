@@ -3,7 +3,6 @@ from ui import IntelligentStudyPlannerUI
 
 
 def main():
-
     root = tk.Tk()
     app = IntelligentStudyPlannerUI(root)
     root.mainloop()
